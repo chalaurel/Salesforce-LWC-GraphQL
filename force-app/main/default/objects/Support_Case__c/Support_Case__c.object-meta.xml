@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Support Case Custom Object</description>
+    <label>Support Case</label>
+    <nameField>
+        <type>AutoNumber</type>
+        <label>Support Case Number</label>
+        <displayFormat>SC-{0000}</displayFormat>
+    </nameField>
+    <pluralLabel>Support Cases</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+    <enableActivities>true</enableActivities>
+    <enableReports>true</enableReports>
+</CustomObject>
