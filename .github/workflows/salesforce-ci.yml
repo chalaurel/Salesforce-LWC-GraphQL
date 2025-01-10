@@ -75,7 +75,7 @@ jobs:
         if: failure()
         run: echo "❌ Deployment to ${{ env.ENVIRONMENT_NAME }} failed. Check the logs for details."
 
-      # Logout from Salesforce Org
+      # Logout from SF
       - name: Logout from Salesforce Org
         if: always()
         run: sf org logout --target-org $SF_ORG_ALIAS --no-prompt
