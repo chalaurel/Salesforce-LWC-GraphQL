@@ -1,0 +1,16 @@
+
+Org Description
+┌──────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ KEY              │ VALUE                                                                                                                                                                   │
+├──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Access Token     │ 00DQy00000CUGpf!AQEAQG_ABHhTchdFFhGjPjS5ADFIKZEnstz0teokPCQe5jclbp.YomdIKa2Pr4fPEBhixpj8KRlZs.63WKmO_AFyzx2HuWO2                                                        │
+│ Alias            │ mockUp                                                                                                                                                                  │
+│ Api Version      │ 62.0                                                                                                                                                                    │
+│ Client Id        │ PlatformCLI                                                                                                                                                             │
+│ Connected Status │ Connected                                                                                                                                                               │
+│ Id               │ 00DQy00000CUGpfMAH                                                                                                                                                      │
+│ Instance Url     │ https://mindful-raccoon-4l9vem-dev-ed.trailblaze.my.salesforce.com                                                                                                      │
+│ Sfdx Auth Url    │ force://PlatformCLI::5Aep861t2K6ODXFXkFQMHPphqUJlsYN_D4t2foGqVcSR4Cpc1SIhrLjdTkgxqIC3pg.cPaKrB9IeEEVzKljFs7j@mindful-raccoon-4l9vem-dev-ed.trailblaze.my.salesforce.com │
+│ Username         │ charitylaurel@mindful-raccoon-4l9vem.com                                                                                                                                │
+└──────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+

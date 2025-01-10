@@ -41,7 +41,6 @@ jobs:
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
 
-      # Step 5: Run Apex Tests with Code Coverage Check
       - name: Run Apex Tests
         run: |
           sf apex run test --target-org mockUp --result-format human --code-coverage --test-level RunLocalTests
