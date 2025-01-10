@@ -1,63 +1,81 @@
-name: Salesforce CI/CD Workflow
+name: Deploy to Production
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
+    types: [closed]
     branches:
       - master
+    paths:
+      - 'force-app/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production  # Directly deploy to production
+    environment: production
+    timeout-minutes: 30
+    env:
+      ENVIRONMENT_NAME: Production
+      SF_ORG_ALIAS: mockUp
+      TEST_LEVEL: RunAllTestsInOrg
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout the code
+      - uses: actions/checkout@v3
 
-      # Step 2: Cache Salesforce CLI to speed up builds
+      # Cache Salesforce CLI
       - name: Cache Salesforce CLI
         uses: actions/cache@v3
         with:
-          path: ~/.sf
-          key: ${{ runner.os }}-sf-cli
-          restore-keys: |
-            ${{ runner.os }}-sf-cli
+          path: ~/.npm
+          key: sf-cli-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: sf-cli-${{ runner.os }}-
 
-      # Step 3: Set up Salesforce CLI
+      # Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
           npm install --global @salesforce/cli
-          sf --version
 
-      # Step 4: Authenticate to Salesforce Org
-      - name: Authenticate to Salesforce (Production)
+      # Authenticate to Salesforce Org
+      - name: Authenticate to Salesforce Org
         run: |
-          echo "${{ secrets.SFDX_AUTH_URL }}" > sf-auth-url.txt
-          sf org login sfdx-url --alias mockUp --sfdx-url-file sf-auth-url.txt
-        env:
-          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+          echo ${{ secrets.SFDX_AUTH_URL }} > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias $SF_ORG_ALIAS --set-default
+          rm -f auth.txt
 
-      - name: Run Apex Tests
+      # Run Code Analysis
+      - name: Run Code Analysis
         run: |
-          sf apex run test --target-org mockUp --result-format human --code-coverage --test-level RunLocalTests
+          sf scanner run --target 'force-app/**' --category "Best Practices,Performance"
 
-      # Step 6: Deploy Metadata to Salesforce Org
-      - name: Deploy Metadata
+      # Deploy to Production with Rollback
+      - name: Deploy to ${{ env.ENVIRONMENT_NAME }}
         run: |
-          sf project deploy start --target-org mockUp --wait 10
+          sf project deploy start \
+            --target-org $SF_ORG_ALIAS \
+            --test-level $TEST_LEVEL \
+            --verbose \
+            --rollback-on-error \
+            --parallel | tee deploy.log
 
-      # Step 7: Upload Metadata as Artifact (Backup)
-      - name: Upload Metadata Backup
+      # Upload Deployment Logs on Failure
+      - name: Upload Deployment Logs
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: deployed-metadata
-          path: force-app/
+          name: deployment-logs
+          path: deploy.log
 
-      # 🔒 Step 8: Cleanup Auth File
-      - name: Cleanup Auth File
+      # Deployment Success Message
+      - name: Deployment Success
+        if: success()
+        run: echo "✅ Deployment to ${{ env.ENVIRONMENT_NAME }} was successful!"
+
+      # Deployment Failure Message
+      - name: Deployment Failed
+        if: failure()
+        run: echo "❌ Deployment to ${{ env.ENVIRONMENT_NAME }} failed. Check the logs for details."
+
+      # Logout from Salesforce Org
+      - name: Logout from Salesforce Org
         if: always()
-        run: rm -f sf-auth-url.txt
+        run: sf org logout --target-org $SF_ORG_ALIAS --no-prompt
