@@ -37,19 +37,19 @@ jobs:
       - name: Authenticate to Salesforce (Production)
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > sf-auth-url.txt
-          sf org login sfdx-url --alias deployOrg --sfdx-url-file sf-auth-url.txt
+          sf org login sfdx-url --alias mockUp --sfdx-url-file sf-auth-url.txt
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
 
       # Step 5: Run Apex Tests with Code Coverage Check
       - name: Run Apex Tests
         run: |
-          sf apex run test --target-org deployOrg --result-format human --code-coverage --test-level RunLocalTests
+          sf apex run test --target-org mockUp --result-format human --code-coverage --test-level RunLocalTests
 
       # Step 6: Deploy Metadata to Salesforce Org
       - name: Deploy Metadata
         run: |
-          sf project deploy start --target-org deployOrg --wait 10
+          sf project deploy start --target-org mockUp --wait 10
 
       # Step 7: Upload Metadata as Artifact (Backup)
       - name: Upload Metadata Backup
