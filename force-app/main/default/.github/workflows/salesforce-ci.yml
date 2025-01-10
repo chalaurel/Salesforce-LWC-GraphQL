@@ -1,0 +1,64 @@
+name: Salesforce CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - master  # Change to 'main' if your default branch is 'main'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production  # Directly deploy to production
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Cache Salesforce CLI to speed up builds
+      - name: Cache Salesforce CLI
+        uses: actions/cache@v3
+        with:
+          path: ~/.sf
+          key: ${{ runner.os }}-sf-cli
+          restore-keys: |
+            ${{ runner.os }}-sf-cli
+
+      # Step 3: Set up Salesforce CLI
+      - name: Set up Salesforce CLI
+        uses: amtrack/sfdx-action@v1
+        with:
+          version: latest
+
+      # Step 4: Authenticate to Salesforce Org
+      - name: Authenticate to Salesforce (Production)
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > sf-auth-url.txt
+          sf org login sfdx-url --alias deployOrg --sfdx-url-file sf-auth-url.txt
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+
+      # Step 5: Run Apex Tests with Code Coverage Check
+      - name: Run Apex Tests
+        run: |
+          sf apex run test --target-org deployOrg --result-format human --code-coverage --test-level RunLocalTests
+
+      # Step 6: Deploy Metadata to Salesforce Org
+      - name: Deploy Metadata
+        run: |
+          sf project deploy start --target-org deployOrg --wait 10
+
+      # Step 7: Upload Metadata as Artifact (Backup)
+      - name: Upload Metadata Backup
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployed-metadata
+          path: force-app/
+
+      # 🔒 Step 8: Cleanup Auth File
+      - name: Cleanup Auth File
+        if: always()
+        run: rm -f sf-auth-url.txt
