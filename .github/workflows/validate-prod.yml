@@ -1,0 +1,50 @@
+name: Validate Production Pull Request
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'force-app/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ENVIRONMENT_NAME: PRODUCTION
+      SF_ORG_ALIAS: mockUp
+      TEST_LEVEL: RunLocalTests
+      DRY_RUN: true
+
+    steps:
+      # Install Salesforce CLI (Official Method)
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global @salesforce/cli
+
+      # Authenticate to Salesforce Org using Auth URL
+      - name: Authenticate to Salesforce Org
+        run: |
+          echo ${{ secrets.SFDX_AUTH_URL }} > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias $SF_ORG_ALIAS --set-default
+          rm -f auth.txt  # Remove the file after authentication for security
+
+      # Validate the Deployment (Check-Only)
+      - name: Validate Deployment on ${{ env.ENVIRONMENT_NAME }}
+        run: |
+          sf project deploy start \
+            --target-org $SF_ORG_ALIAS \
+            --dry-run \
+            --test-level $TEST_LEVEL \
+            --verbose \
+            --ignore-errors
+
+      # Provide Deployment Feedback
+      - name: Deployment Summary
+        if: success()
+        run: echo "✅ Deployment validation to ${{ env.ENVIRONMENT_NAME }} was successful!"
+
+      - name: Deployment Failed
+        if: failure()
+        run: echo "❌ Deployment validation failed. Check the logs for details."
