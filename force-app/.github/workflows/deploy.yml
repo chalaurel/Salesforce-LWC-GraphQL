@@ -1,0 +1,38 @@
+name: Salesforce Deployment
+
+on:
+  push:
+    branches:
+      - master  # Trigger deployment on push to 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Install Salesforce CLI
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global @salesforce/cli
+
+      # Step 2: Authenticate to Salesforce Org
+      - name: Authenticate to Salesforce Org
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias deployOrg --set-default
+          rm auth.txt
+
+      # Step 3: Deploy Metadata to Salesforce
+      - name: Deploy Metadata
+        run: |
+          sf project deploy start --target-org deployOrg --wait 10
+
+      # Step 4: Deployment Success Message
+      - name: Deployment Success
+        if: success()
+        run: echo "✅ Deployment was successful!"
+
+      # Step 5: Deployment Failure Message
+      - name: Deployment Failed
+        if: failure()
+        run: echo "❌ Deployment failed. Check the logs."
