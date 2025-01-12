@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField>
+    <fullName>DueDate__c</fullName>
+    <type>Date</type>
+    <inlineHelpText/>
+    <required>false</required>
+    <description>Due Date</description>
+    <label>Due Date</label>
+    <securityClassification>Internal</securityClassification>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField>
+    <fullName>SLA_Violation__c</fullName>
+    <type>Checkbox</type>
+    <inlineHelpText/>
+    <defaultValue>false</defaultValue>
+    <description>True if Violates the SLA</description>
+    <label>SLA Violation</label>
+    <securityClassification>Internal</securityClassification>
+</CustomField>
